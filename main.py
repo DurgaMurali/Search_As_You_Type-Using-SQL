@@ -11,7 +11,7 @@ root.geometry("940x600+20+20")
 root.title("Search As You Type")
 
 
-#-------------- insert_button functionality -------------------------
+#-------------- insert_button functionality -----------------------
 def insert_record():
 	title=title_entry.get()
 	author=author_entry.get()
