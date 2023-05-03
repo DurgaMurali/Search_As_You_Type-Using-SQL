@@ -7,8 +7,8 @@ Our aim is to implement the solution presented in the paper, which utilizes the 
 ## Getting Started
 
 ### Pre-requisites
-* Python --latest version
-* MySQL Workbench
+* Python (latest version)
+* MySQL Workbench (latest version)
 
 ### Installing
 
