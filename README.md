@@ -7,7 +7,7 @@ Our aim is to implement the solution presented in the paper, which utilizes the 
 ## Getting Started
 
 ### Pre-requisites
-* Python (latest version)
+* Python and pip (latest version)
 * MySQL Workbench (latest version)
 
 ### Installing
