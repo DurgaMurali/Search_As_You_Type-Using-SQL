@@ -7,8 +7,8 @@ Our aim is to implement the prototype solution presented in the paper, which uti
 ## Getting Started
 
 ### Pre-requisites
-* Python and pip (latest version)
-* MySQL Workbench (latest version)
+* Python and pip 
+* MySQL Workbench 
 
 ### Installing
 
