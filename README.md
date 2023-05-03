@@ -2,10 +2,6 @@
 
 Providing SATY feature using SQL
 
-## Description
-
---
-
 ## Getting Started
 
 ### Pre-requisites
