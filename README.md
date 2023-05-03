@@ -9,8 +9,8 @@ Providing SATY feature using SQL
 ## Getting Started
 
 ### Pre-requisites
-Python --latest version
-MySQL Workbench
+* Python --latest version
+* MySQL Workbench
 
 ### Installing
 
@@ -20,14 +20,14 @@ pip install mysql-connector-python
 ```
 
 ### Executing program
-
+Run the main.py file
 ```
 python main.py
 ```
 
 ## Authors
 
-Contributors names - Charul Rathore and Durga Muralidharan 
+Charul Rathore and Durga Muralidharan 
 
 
 ## Acknowledgments
