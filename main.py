@@ -3,8 +3,8 @@ from tkinter import ttk
 import tkinter.messagebox as MessageBox
 import mysql.connector as mysql
 from search_functions import search_exact_index, search_fuzzy_gram, search_fuzzy_neighborhood
-from exact_search import createAuxiliaryTables_exact, computePrefix_exact
-from fuzzy_search import createAuxiliaryTables, computePrefix, createNgrams
+
+
 
 root=Tk()
 root.geometry("940x600+20+20")
@@ -75,49 +75,6 @@ def check(e):
 			# print("options[3] selected")
 			search_fuzzy_neighborhood(typed,dbpl_table,keyword_list)	
 
-	
-
-# Create Neighborhood deletion table
-def createNeighborhoodDeletion():
-	print("createNeighborhoodDeletion")
-	connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
-	cursor=connection.cursor()
-	cursor.execute("SELECT Prefix from paperdb.PrefixTable")
-	prefix_list = cursor.fetchall()
-	test_list = []
-	test_list.append(tuple(("privacy", 1)))
-
-	for record in prefix_list:
-		prefix = record[0]
-		neighborhood_list = []
-		max_i_deletion = 3
-		i_deletion = 1
-
-		data_tuple = [prefix, prefix, 0]
-		neighborhood_list.append(data_tuple)
-
-		while i_deletion <= max_i_deletion:
-			i = 0
-			while i<len(prefix):
-				if i+i_deletion <= len(prefix):
-					i_deleted_string = prefix[:i] + prefix[i+i_deletion:]
-					# print(prefix, " - ", i_deleted_string)
-					if len(i_deleted_string) > 0 and len(i_deleted_string) < len(prefix):
-						data_tuple = [prefix, i_deleted_string, i_deletion]
-						neighborhood_list.append(data_tuple)
-						# print(data_tuple)
-				i += 1
-
-			if i_deletion > 1:
-				i_deleted_string = prefix[:]
-				# print(prefix, " - ", i_deleted_string)
-			i_deletion += 1
-
-	query = """	INSERT INTO paperdb.NeighborhoodDeletionTable (Prefix, iDeletedString, iDeletion) values (%s, %s, %s) """
-	cursor.executemany(query, neighborhood_list)
-	cursor.execute("COMMIT")
-
-	cursor.close()
 
 #--------------------------- Creating the Edit Table bar --------------------------------------------
 data_frame = LabelFrame(root, text="Edit Table")
@@ -155,7 +112,7 @@ search_frame.place(x=20,y=110,width=900,height=290)
 
 
 # Dropdown menu 
-options = ["Select Algorithm ... ", "Exact: Index-Based Method", "Fuzzy: Gram-Based Method", "Fuzzy: Neighborhood-Generation"]
+options = ["Select Algorithm ... ", "Exact: Index-Based Method", "Fuzzy: Gram-Based Method", "Fuzzy: Levenshtein Distance"]
 clicked = StringVar()
 clicked.set(options[0])
 dropdown_menu = OptionMenu(root, clicked, *options)
@@ -196,14 +153,6 @@ dbpl_table.column("# 4", anchor=CENTER)
 dbpl_table.heading("# 4", text="Title")
 
 dbpl_table.pack()
-
-## Run once for entire table for now
-# createAuxiliaryTables_exact()
-# createAuxiliaryTables()
-# createNgrams()
-# createNeighborhoodDeletion()
-
-# createNeighborhoodDeletion_charul()
 
 connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
 cursor=connection.cursor()

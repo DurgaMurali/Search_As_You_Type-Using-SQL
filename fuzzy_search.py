@@ -209,3 +209,8 @@ def createNgrams():
 		# print(record)
 
 	cursor.close()
+
+
+
+createAuxiliaryTables()
+createNgrams()

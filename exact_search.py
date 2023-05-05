@@ -100,4 +100,4 @@ def computePrefix_exact(alphabet, keyword_list):
 
 	cursor.close()
 
-#---------------------------------------------------------------------------------------------------------------------------------------
+createAuxiliaryTables_exact()
