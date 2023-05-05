@@ -15,10 +15,17 @@ Our aim is to implement the prototype solution presented in the paper, which uti
 ```
 pip install tkinter
 pip install mysql-connector-python
+pip install python-Levenshtein
 ```
 
 ### Executing program
-Run the main.py file
+1. Run all the queries from db_scripts.sql file to create schema in MySQL Workbench
+2. Run the exact_search.py and fuzzy_search.py to populate the schemas 
+```
+python exact_search.py
+python fuzzy_search.py
+```
+3. Run the main.py file to test the search features
 ```
 python main.py
 ```
