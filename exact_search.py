@@ -100,4 +100,14 @@ def computePrefix_exact(alphabet, keyword_list):
 
 	cursor.close()
 
+def TruncateTables():
+	connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
+	cursor=connection.cursor()
+	cursor.execute("TRUNCATE paperdb.keywordtable")
+	cursor.execute("TRUNCATE paperdb.exactinvertedindextable")
+	cursor.execute("TRUNCATE paperdb.exactprefixtable")
+	cursor.close()
+
+
+TruncateTables()
 createAuxiliaryTables_exact()

@@ -48,8 +48,6 @@ def createAuxiliaryTables():
 		
 		index = index + 1
 
-	# keyword_query = """	INSERT INTO paperdb.keywordtable(KeywordID, Keyword) values (%s, %s) """
-	# cursor.executemany(keyword_query, keyword_tuple_list)
 	inverted_index_query = """ INSERT INTO paperdb.invertedindextable (KeywordID, RecordID) values (%s, %s) """
 	cursor.executemany(inverted_index_query, inverted_index_tuple_list)
 	cursor.execute("COMMIT")
@@ -210,7 +208,15 @@ def createNgrams():
 
 	cursor.close()
 
+def TruncateTables():
+	connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
+	cursor=connection.cursor()
+	cursor.execute("TRUNCATE paperdb.invertedindextable")
+	cursor.execute("TRUNCATE paperdb.prefixtable")
+	cursor.execute("TRUNCATE paperdb.ngramstable")
+	cursor.close()
 
 
+TruncateTables()
 createAuxiliaryTables()
 createNgrams()
