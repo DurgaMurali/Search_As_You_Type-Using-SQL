@@ -108,6 +108,5 @@ def TruncateTables():
 	cursor.execute("TRUNCATE paperdb.exactprefixtable")
 	cursor.close()
 
-
 TruncateTables()
 createAuxiliaryTables_exact()
