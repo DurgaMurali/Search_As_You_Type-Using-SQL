@@ -34,5 +34,4 @@ Prefix varchar(255),
 iDeletedString varchar(255),
 iDeletion int,
 PRIMARY KEY (Prefix, iDeletedString, iDeletion)
-);
-
+)
