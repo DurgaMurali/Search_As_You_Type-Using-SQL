@@ -30,7 +30,7 @@ python fuzzy_search.py
 ```
 python main.py
 ```
-5. If a a set of new records are inserted using UI, then step 2. need to be excuted again as well to populate the information of new record in auxillary tables. 
+5. If a set of new records are inserted using UI, then step 2. need to be excuted again as well to populate the information of new record in auxillary tables. 
 ## Authors
 
 Charul Rathore and Durga Muralidharan 
