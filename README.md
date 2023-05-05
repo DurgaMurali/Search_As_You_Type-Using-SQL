@@ -25,7 +25,7 @@ pip install python-Levenshtein
 python exact_search.py
 python fuzzy_search.py
 ```
-3. Update 'host', 'user', 'password' with your credentials in all the statements like this in *main.py* file - 
+3. Update 'host', 'user', 'password' with your credentials in all the statements that connect to mysql in *main.py* file - 
 ```
 mysql.connect(host="---", user="---", password="---", database="paperdb")
 ```
