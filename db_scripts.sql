@@ -4,7 +4,7 @@
 CREATE TABLE paperdb.dblp ( 
     RecordID int PRIMARY KEY NOT NULL AUTO_INCREMENT,
     Title varchar(255) NOT NULL,
-    Authors varchar(255) NOT NULL,
+    Authors varchar(1000) NOT NULL,
     Booktitle varchar(255) NOT NULL,
     Year int NOT NULL
 );

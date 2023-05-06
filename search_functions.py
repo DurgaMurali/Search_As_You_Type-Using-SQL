@@ -41,7 +41,7 @@ def search_exact_index(typed,dbpl_table,keyword_list):
 	start_time = time()
 	cursor.execute(query2,keyword)
 	end_time = time()
-	print("Exact search time taken is ", end_time-start_time)
+	print(f"Exact search time taken is {end_time-start_time} seconds")
 
 	# clearing table view
 	for item in dbpl_table.get_children():
@@ -81,7 +81,7 @@ def search_fuzzy_gram(typed,dbpl_table,keyword_list):
 	start_time = time()
 	cursor.execute(query, keyword)
 	end_time = time()
-	print("Fuzzy ngram search time taken is ", end_time-start_time)
+	print(f"Fuzzy ngram search time taken is {end_time-start_time} seconds")
 
 	# clearing table view
 	for item in dbpl_table.get_children():
@@ -137,7 +137,7 @@ def search_fuzzy_neighborhood(typed,dbpl_table,keyword_list):
 	start_time = time()
 	cursor.execute(query, keyword)
 	end_time = time()
-	print("Levenshtein search time taken is ", end_time-start_time)
+	print(f"Levenshtein search time taken is {end_time-start_time} seconds")
 
 	# clearing table view
 	for item in dbpl_table.get_children():
