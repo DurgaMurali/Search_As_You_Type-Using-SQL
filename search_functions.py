@@ -4,6 +4,7 @@ import tkinter.messagebox as MessageBox
 import mysql.connector as mysql
 import Levenshtein
 from Levenshtein import distance
+from time import time
 
 # Update the listbox
 def update(data,keyword_list):
@@ -37,7 +38,10 @@ def search_exact_index(typed,dbpl_table,keyword_list):
 			AND paperdb.exactinvertedindextable.RecordID = paperdb.dblp.RecordID"""
 	# print("typed",typed)
 	keyword = (typed, )
+	start_time = time()
 	cursor.execute(query2,keyword)
+	end_time = time()
+	print("Exact search time taken is ", end_time-start_time)
 
 	# clearing table view
 	for item in dbpl_table.get_children():
@@ -67,14 +71,17 @@ def search_fuzzy_gram(typed,dbpl_table,keyword_list):
 	data = cursor.fetchall()
 	update(data,keyword_list)
 
-	query = """ select Title, Authors, Booktitle, Year FROM paperdb.PrefixTable, paperdb.NgramsTable, paperdb.invertedindextable, paperdb.dblp 
+	query = """ select distinct Title, Authors, Booktitle, Year FROM paperdb.PrefixTable, paperdb.NgramsTable, paperdb.invertedindextable, paperdb.dblp 
 	where paperdb.NgramsTable.Prefix = paperdb.PrefixTable.Prefix
 	AND paperdb.PrefixTable.UpperKID >= paperdb.invertedindextable.KeywordID 
 	AND paperdb.PrefixTable.LowerKID <= paperdb.invertedindextable.KeywordID 
 	AND paperdb.invertedindextable.RecordID = paperdb.dblp.RecordID
 	AND paperdb.NgramsTable.Ngram = %s """
 	keyword = (typed, )
+	start_time = time()
 	cursor.execute(query, keyword)
+	end_time = time()
+	print("Fuzzy ngram search time taken is ", end_time-start_time)
 
 	# clearing table view
 	for item in dbpl_table.get_children():
@@ -120,14 +127,17 @@ def search_fuzzy_neighborhood(typed,dbpl_table,keyword_list):
 	data = cursor.fetchall()
 	update(data,keyword_list)
 
-	query = """ select Title, Authors, Booktitle, Year FROM paperdb.PrefixTable, paperdb.NgramsTable, paperdb.invertedindextable, paperdb.dblp 
+	query = """ select distinct Title, Authors, Booktitle, Year FROM paperdb.PrefixTable, paperdb.NgramsTable, paperdb.invertedindextable, paperdb.dblp 
 	where paperdb.NgramsTable.Prefix = paperdb.PrefixTable.Prefix
 	AND paperdb.PrefixTable.UpperKID >= paperdb.invertedindextable.KeywordID 
 	AND paperdb.PrefixTable.LowerKID <= paperdb.invertedindextable.KeywordID 
 	AND paperdb.invertedindextable.RecordID = paperdb.dblp.RecordID
 	AND paperdb.NgramsTable.Ngram = %s """
 	keyword = (typed_, )
+	start_time = time()
 	cursor.execute(query, keyword)
+	end_time = time()
+	print("Levenshtein search time taken is ", end_time-start_time)
 
 	# clearing table view
 	for item in dbpl_table.get_children():
