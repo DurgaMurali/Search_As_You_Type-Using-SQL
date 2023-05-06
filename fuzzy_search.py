@@ -42,7 +42,8 @@ def createAuxiliaryTables():
 		keyword_tuple = tuple((index, keyword))
 		keyword_tuple_list.append(keyword_tuple)
 		record_id_list = keyword_dict[keyword]
-		for record_id in record_id_list:
+		record_set = set(record_id_list)
+		for record_id in record_set:
 			inverted_index_tuple = tuple((index, record_id))
 			inverted_index_tuple_list.append(inverted_index_tuple)
 		
@@ -53,15 +54,6 @@ def createAuxiliaryTables():
 	cursor.execute("COMMIT")
 	cursor.close()
 
-	# print("Keyword Table")
-	# for item in keyword_tuple_list:
-	# 	print(item)
-
-	# print("Inverted Index Table")
-	# for item in inverted_index_tuple_list:
-	# 	print(item)
-
-	# print("Prefix table")
 	alphabet_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 	for alpha in alphabet_list:
 		computePrefix(alpha, keyword_tuple_list)
@@ -72,7 +64,6 @@ def computePrefix(alphabet, keyword_list):
 	for tuple in keyword_list:
 		if tuple[1][0] == alphabet:
 			alpha_list.append(tuple)
-	# print(alpha_list)
 
 	x = 0
 	len_alpha = len(alpha_list)
@@ -82,68 +73,45 @@ def computePrefix(alphabet, keyword_list):
 	
 	prefix_dict = dict()
 	index = 0
+	prefix_len = 0
 	while index<len_alpha-1:
 		nextIndex = index + 1
-		index_prefix_len = 0
-		while nextIndex<len_alpha:
+		if nextIndex<len_alpha:
 			prefix = os.path.commonprefix([alpha_list[index][1], alpha_list[nextIndex][1]])
-			# print("prefix - ", prefix)
 			if prefix not in prefix_dict:
 				prefix_dict[prefix] = []
 
 			prefix_dict[prefix].append(alpha_list[index][0])
 			prefix_dict[prefix].append(alpha_list[nextIndex][0])
-			# print(prefix_dict[prefix])
 
-			# Find sub_prefixes of length greater than 4 and add them
 			prefix_len = len(prefix)
-			prefix_index = 2
-			if prefix_len > 4:
-				while(prefix_index < prefix_len):
-					sub_prefix = alpha_list[index][1][:prefix_index]
-					print("sub_prefix 1 - ", sub_prefix)
-					if sub_prefix not in prefix_dict:
-						# print("Add ", sub_prefix)
-						prefix_dict[sub_prefix] = []
 
-					prefix_dict[sub_prefix].append(alpha_list[index][0])
-					prefix_dict[sub_prefix].append(alpha_list[nextIndex][0])
-					prefix_index += 2
-
-			if index_prefix_len<prefix_len :
-				index_prefix_len = prefix_len
-			
-			nextIndex += 1
-
-			print("index_prefix_len = ", index_prefix_len)
 			# If prefix length is less than 3 letters
-			if index_prefix_len < 3:
+			if prefix_len < 3:
 				keyword_len = len(alpha_list[index][1])
-				prefix_index = 5
+				prefix_index = 3
 				if(prefix_index < keyword_len):
 					sub_prefix = alpha_list[index][1][:prefix_index]
-					print("sub_prefix 2 -", sub_prefix)
 					if sub_prefix not in prefix_dict:
 						prefix_dict[sub_prefix] = []
 
 					prefix_dict[sub_prefix].append(alpha_list[index][0])
 					prefix_dict[sub_prefix].append(alpha_list[index][0])
 
+		nextIndex += 1
 		index += 1
 
-		print("out index_prefix_len = ", index_prefix_len)
-		# Do it once for the last index that does not loop through while
-		if index_prefix_len < 3:
-			keyword_len = len(alpha_list[index][1])
-			prefix_index = 4
-			if(prefix_index < keyword_len):
-				sub_prefix = alpha_list[index][1][:prefix_index]
-				print("sub_prefix 2 -", sub_prefix)
-				if sub_prefix not in prefix_dict:
-					prefix_dict[sub_prefix] = []
+	# Do it once for the last index that does not loop through while
+	if prefix_len < 3:
+		keyword_len = len(alpha_list[index][1])
+		prefix_index = 3
+		if(prefix_index < keyword_len):
+			sub_prefix = alpha_list[index][1][:prefix_index]
+			if sub_prefix not in prefix_dict:
+				prefix_dict[sub_prefix] = []
 
-				prefix_dict[sub_prefix].append(alpha_list[index][0])
-				prefix_dict[sub_prefix].append(alpha_list[index][0])
+			prefix_dict[sub_prefix].append(alpha_list[index][0])
+			prefix_dict[sub_prefix].append(alpha_list[index][0])
 
 	sorted_prefix_dict = dict()
 	tuple_list = []
@@ -190,23 +158,25 @@ def createNgrams():
 	for record in prefix_list:
 		prefix = record[0]
 		NgramList = []
+		NgramSet = []
+		NgramTupleList = []
 		while len(prefix) >= N:
 			data_tuple = tuple((record[0], prefix[:N]))
-			# print(data_tuple)
 			NgramList.append(data_tuple)
 			prefix = prefix[1:]
 
+			NgramSet = set(NgramList)
+			NgramTupleList = list(NgramSet)
+
 		query = """	INSERT INTO paperdb.NgramsTable (Prefix, Ngram) values (%s, %s) """
-		cursor.executemany(query, NgramList)
+		cursor.executemany(query, NgramTupleList)
 		cursor.execute("COMMIT")
 
-	# print("NgramsTable")
 	cursor.execute("Select * from paperdb.NgramsTable")
 	prefix_list = cursor.fetchall()
-	# for record in prefix_list:
-		# print(record)
 
 	cursor.close()
+	
 
 def TruncateTables():
 	connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")

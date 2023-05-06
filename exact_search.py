@@ -3,6 +3,7 @@ from tkinter import ttk
 import tkinter.messagebox as MessageBox
 import mysql.connector as mysql
 from rake_nltk import Rake
+import csv
 
 ##--------------------------------AuxiliaryTables Functionality----------------------------------------------------------------------------------
 # Create Keyword, Inverted Index and Prefix tables for EXACT search
@@ -46,7 +47,8 @@ def createAuxiliaryTables_exact():
 		keyword_tuple = tuple((index, keyword))
 		keyword_tuple_list.append(keyword_tuple)
 		record_id_list = keyword_dict[keyword]
-		for record_id in record_id_list:
+		record_set = set(record_id_list)
+		for record_id in record_set:
 			inverted_index_tuple = tuple((index, record_id))
 			inverted_index_tuple_list.append(inverted_index_tuple)
 		
@@ -100,13 +102,32 @@ def computePrefix_exact(alphabet, keyword_list):
 
 	cursor.close()
 
+def populateDBLP():
+	with open("./DBLP2.csv", 'r', newline='', encoding = "ISO-8859-1") as file:
+		reader = csv.DictReader(file)
+		tuple_list = []
+		index = 1
+		for row in reader:
+			data_tuple = tuple((row['title'], row['authors'], row['venue'], row['year']))
+			tuple_list.append(data_tuple)
+
+		connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
+		cursor=connection.cursor()	
+		query = """	INSERT INTO paperdb.dblp (Title, Authors, BookTitle, Year) values (%s, %s, %s, %s) """
+		cursor.executemany(query, tuple_list)
+		cursor.execute("COMMIT")
+		cursor.close()
+
+
 def TruncateTables():
 	connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
 	cursor=connection.cursor()
+	cursor.execute("TRUNCATE paperdb.dblp")
 	cursor.execute("TRUNCATE paperdb.keywordtable")
 	cursor.execute("TRUNCATE paperdb.exactinvertedindextable")
 	cursor.execute("TRUNCATE paperdb.exactprefixtable")
 	cursor.close()
 
 TruncateTables()
+populateDBLP()
 createAuxiliaryTables_exact()

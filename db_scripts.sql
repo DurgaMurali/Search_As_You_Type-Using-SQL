@@ -52,3 +52,12 @@ Prefix varchar(255),
 Ngram varchar(10),
 PRIMARY KEY (Prefix, Ngram)
 );
+
+
+-- Indexes created to improve performance
+create index ngramIndex on paperdb.NgramsTable (Ngram, Prefix);
+create index invertedRecordIDIndex on paperdb.InvertedIndexTable (RecordID);
+create index keywordIndex on paperdb.KeywordTable (KeywordID);
+create index PrefixIndex on paperdb.PrefixTable (Prefix);
+create index ExactPrefixIndex on paperdb.exactPrefixTable (Prefix);
+create index ExactinvertedRecordIDIndex on paperdb.exactInvertedIndexTable (RecordID);
