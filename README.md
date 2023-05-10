@@ -19,7 +19,7 @@ pip install python-Levenshtein
 ```
 
 ### Executing program
-1. Run all the queries from *db_scripts.sql* file to create schemas in MySQL Workbench. You can use the Edit table section of UI to populate original *DBPL prototype table* or use the queries mentioned in *db_scripts.sql*
+1. Run all the queries from *db_scripts.sql* file to create schemas in MySQL Workbench. You can use the Edit table section of UI to populate original *DBPL prototype table*.
 2. Run the exact_search.py and fuzzy_search.py to populate the schemas created in step 1.
 ```
 python exact_search.py
