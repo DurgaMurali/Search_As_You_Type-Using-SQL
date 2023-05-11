@@ -23,7 +23,6 @@ if args.populateTables == True:
 
 root=Tk()
 root.geometry("940x600+20+20")
-root.configure(background='white')
 root.title("Search As You Type")
 
 
