@@ -3,79 +3,25 @@ from tkinter import ttk
 import tkinter.messagebox as MessageBox
 import mysql.connector as mysql
 from rake_nltk import Rake
-import csv
 
 ##--------------------------------AuxiliaryTables Functionality----------------------------------------------------------------------------------
-# Create Keyword, Inverted Index and Prefix tables for EXACT search
-def createAuxiliaryTables_exact():
-	connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
+# Create Prefix tables for EXACT search
+def createAuxiliaryTables_exact(dbHost, dbUser, dbPassword):
+	connection=mysql.connect (host=dbHost, user=dbUser, password=dbPassword, database="paperdb")
 	cursor=connection.cursor()
-	cursor.execute("SELECT RecordID, Title, Booktitle from paperdb.dblp")
-	rake = Rake()
-	records = cursor.fetchall()
-
-	keyword_dict = dict()
-	sorted_keyword_dict = dict()
-
-	for record in records:
-		rake.extract_keywords_from_text(record[1])
-		word_list = rake.get_ranked_phrases()
-		word_list.append(record[2].lower())
-		for word in word_list:
-			key_list = word.split(' ')		
-			for key in key_list:
-				if(key not in keyword_dict):
-					keyword_dict[key] = []
-
-				keyword_dict[key].append(record[0])
-				
-
-	# Sort the keywords
-	for keyword in sorted(keyword_dict.keys()):
-		# print(keyword)
-		sorted_keyword_dict[keyword] = []
-		sorted_keyword_dict[keyword].append(keyword_dict[keyword])
-
-	# print("sorted_keyword_dict:", sorted_keyword_dict)
-	
-	keyword_tuple_list = []
-	inverted_index_tuple_list = []
-	index = 1
-
-	# Create tuple list for keyword and inverted index tables
-	for keyword in sorted_keyword_dict.keys():
-		keyword_tuple = tuple((index, keyword))
-		keyword_tuple_list.append(keyword_tuple)
-		record_id_list = keyword_dict[keyword]
-		record_set = set(record_id_list)
-		for record_id in record_set:
-			inverted_index_tuple = tuple((index, record_id))
-			inverted_index_tuple_list.append(inverted_index_tuple)
-		
-		index = index + 1
-
-	keyword_query = """	INSERT INTO paperdb.keywordtable(KeywordID, Keyword) values (%s, %s) """
-	cursor.executemany(keyword_query, keyword_tuple_list)
-	inverted_index_query = """ INSERT INTO paperdb.exactinvertedindextable(KeywordID, RecordID) values (%s, %s) """
-	cursor.executemany(inverted_index_query, inverted_index_tuple_list)
-	cursor.execute("COMMIT")
-	cursor.close()
-
-	# print("Prefix table")
+	cursor.execute("SELECT keywordid, keyword from paperdb.keywordtable")
+	keyword_tuple_list = cursor.fetchall()
 	alphabet_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 	for alpha in alphabet_list:
-		computePrefix_exact(alpha, keyword_tuple_list)
+		computePrefix_exact(alpha, keyword_tuple_list, dbHost, dbUser, dbPassword)
 
 
 
-def computePrefix_exact(alphabet, keyword_list):	
+def computePrefix_exact(alphabet, keyword_list, dbHost, dbUser, dbPassword):	
 	alpha_list = []
 	for tuple in keyword_list:
 		if tuple[1][0] == alphabet:
 			alpha_list.append(tuple)
-
-	# print("alpha_list",alpha_list)
-
 	
 	len_alpha = len(alpha_list)
 
@@ -90,11 +36,7 @@ def computePrefix_exact(alphabet, keyword_list):
 	
 	tuple_list.sort()
 
-	# for value in tuple_list:
-	# 	while (value[1])
-
-	# print(tuple_list)
-	connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
+	connection=mysql.connect (host=dbHost, user=dbUser, password=dbPassword, database="paperdb")
 	cursor=connection.cursor()
 	query = """	INSERT INTO paperdb.exactPrefixTable(Prefix, LowerKID, UpperKID) values (%s, %s, %s) """
 	cursor.executemany(query, tuple_list)
@@ -102,32 +44,13 @@ def computePrefix_exact(alphabet, keyword_list):
 
 	cursor.close()
 
-def populateDBLP():
-	with open("./DBLP2.csv", 'r', newline='', encoding = "ISO-8859-1") as file:
-		reader = csv.DictReader(file)
-		tuple_list = []
-		index = 1
-		for row in reader:
-			data_tuple = tuple((row['title'], row['authors'], row['venue'], row['year']))
-			tuple_list.append(data_tuple)
 
-		connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
-		cursor=connection.cursor()	
-		query = """	INSERT INTO paperdb.dblp (Title, Authors, BookTitle, Year) values (%s, %s, %s, %s) """
-		cursor.executemany(query, tuple_list)
-		cursor.execute("COMMIT")
-		cursor.close()
-
-
-def TruncateTables():
-	connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
+def TruncateTables(dbHost, dbUser, dbPassword):
+	connection=mysql.connect (host=dbHost, user=dbUser, password=dbPassword, database="paperdb")
 	cursor=connection.cursor()
-	cursor.execute("TRUNCATE paperdb.dblp")
-	cursor.execute("TRUNCATE paperdb.keywordtable")
-	cursor.execute("TRUNCATE paperdb.exactinvertedindextable")
 	cursor.execute("TRUNCATE paperdb.exactprefixtable")
 	cursor.close()
 
-TruncateTables()
-populateDBLP()
-createAuxiliaryTables_exact()
+def exactTableFunctions(dbHost, dbUser, dbPassword):
+	TruncateTables(dbHost, dbUser, dbPassword)
+	createAuxiliaryTables_exact(dbHost, dbUser, dbPassword)

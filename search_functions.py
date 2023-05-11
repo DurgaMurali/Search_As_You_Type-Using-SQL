@@ -16,27 +16,23 @@ def update(data,keyword_list):
 		keyword_list.insert(END, item)	
 
 # # Create function to implement different search_exact_index algorithms 
-def search_exact_index(typed,dbpl_table,keyword_list):
-	# print("search_exact_index")
-	# print("typed - ",typed)
-	connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
+def search_exact_index(typed,dbpl_table,keyword_list, dbHost, dbUser, dbPassword):
+	connection=mysql.connect (host=dbHost, user=dbUser, password=dbPassword, database="paperdb")
 	cursor=connection.cursor()
 
 	## query from paper Section 3.2 
 	query1 = "SELECT Keyword from paperdb.keywordtable where paperdb.keywordtable.keyword LIKE %s"
-	# print("typed",typed)
 	keyword = (typed + '%', )
 	cursor.execute(query1,keyword)
 	data = cursor.fetchall()
 	update(data,keyword_list)
 
 	## query from paper Section 3.2 
-	query2 = """SELECT Title, Authors, Booktitle, Year FROM paperdb.exactprefixtable, paperdb.exactinvertedindextable, paperdb.dblp 
+	query2 = """SELECT Title, Authors, Booktitle, Year FROM paperdb.exactprefixtable, paperdb.invertedindextable, paperdb.dblp 
 			WHERE paperdb.exactprefixtable.Prefix = %s
-			AND paperdb.exactprefixtable.UpperKID >= paperdb.exactinvertedindextable.KeywordID 
-			AND paperdb.exactprefixtable.LowerKID <= paperdb.exactinvertedindextable.KeywordID  
-			AND paperdb.exactinvertedindextable.RecordID = paperdb.dblp.RecordID"""
-	# print("typed",typed)
+			AND paperdb.exactprefixtable.UpperKID >= paperdb.invertedindextable.KeywordID 
+			AND paperdb.exactprefixtable.LowerKID <= paperdb.invertedindextable.KeywordID  
+			AND paperdb.invertedindextable.RecordID = paperdb.dblp.RecordID"""
 	keyword = (typed, )
 	start_time = time()
 	cursor.execute(query2,keyword)
@@ -57,15 +53,12 @@ def search_exact_index(typed,dbpl_table,keyword_list):
 
 
 # Create function to implement different search_fuzzy_gram algorithms 
-def search_fuzzy_gram(typed,dbpl_table,keyword_list):
-	# print("search_fuzzy_gram")
-	# print("typed - ",typed)
-	connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
+def search_fuzzy_gram(typed,dbpl_table,keyword_list, dbHost, dbUser, dbPassword):
+	connection=mysql.connect (host=dbHost, user=dbUser, password=dbPassword, database="paperdb")
 	cursor=connection.cursor()
 
 	## query from paper Section 3.2 
 	query1 = "SELECT Keyword from paperdb.keywordtable where paperdb.keywordtable.keyword LIKE %s"
-	# print("typed",typed)
 	keyword = ('%' + typed + '%', )
 	cursor.execute(query1,keyword)
 	data = cursor.fetchall()
@@ -105,11 +98,9 @@ def fuzzy_search_one_wrong_char(query, choices, threshold=1):
 	    
     return query if len(results) == 0 else results[0]
 
-# Create function to implement differeent search_fuzzy_neighborhood algorithms 
-def search_fuzzy_neighborhood(typed,dbpl_table,keyword_list):
-	# print("search_fuzzy_gram")
-	# print("typed - ",typed)
-	connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
+# Create function to implement different search_fuzzy_neighborhood algorithms 
+def search_fuzzy_neighborhood(typed,dbpl_table,keyword_list, dbHost, dbUser, dbPassword):
+	connection=mysql.connect (host=dbHost, user=dbUser, password=dbPassword, database="paperdb")
 	cursor=connection.cursor()
 	query_ = "select ngram from paperdb.ngramstable;"
 	cursor.execute(query_)
@@ -121,7 +112,6 @@ def search_fuzzy_neighborhood(typed,dbpl_table,keyword_list):
 	typed_ = fuzzy_search_one_wrong_char(typed,list_)
 
 	query1 = "SELECT Keyword from paperdb.keywordtable where paperdb.keywordtable.keyword LIKE %s"
-	# print("typed",typed_)
 	keyword = ('%' + typed_ + '%', )
 	cursor.execute(query1,keyword)
 	data = cursor.fetchall()

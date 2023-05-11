@@ -4,11 +4,13 @@ import tkinter.messagebox as MessageBox
 import mysql.connector as mysql
 import os.path
 from rake_nltk import Rake
+import csv
+import os.path
 
 
 # Create Keyword, Inverted Index and Prefix tables --- for fuzzy search and Gram-based method
-def createAuxiliaryTables():
-	connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
+def createAuxiliaryTables(dbHost, dbUser, dbPassword):
+	connection=mysql.connect (host=dbHost, user=dbUser, password=dbPassword, database="paperdb")
 	cursor=connection.cursor()
 	cursor.execute("SELECT RecordID, Title, Booktitle from paperdb.dblp")
 	rake = Rake()
@@ -30,7 +32,6 @@ def createAuxiliaryTables():
 
 	# Sort the keywords
 	for keyword in sorted(keyword_dict.keys()):
-		# print(keyword)
 		sorted_keyword_dict[keyword] = []
 		sorted_keyword_dict[keyword].append(keyword_dict[keyword])
 	
@@ -49,6 +50,8 @@ def createAuxiliaryTables():
 		
 		index = index + 1
 
+	keyword_query = """	INSERT INTO paperdb.keywordtable(KeywordID, Keyword) values (%s, %s) """
+	cursor.executemany(keyword_query, keyword_tuple_list)
 	inverted_index_query = """ INSERT INTO paperdb.invertedindextable (KeywordID, RecordID) values (%s, %s) """
 	cursor.executemany(inverted_index_query, inverted_index_tuple_list)
 	cursor.execute("COMMIT")
@@ -56,10 +59,10 @@ def createAuxiliaryTables():
 
 	alphabet_list = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x', 'y', 'z']
 	for alpha in alphabet_list:
-		computePrefix(alpha, keyword_tuple_list)
+		computePrefix(alpha, keyword_tuple_list, dbHost, dbUser, dbPassword)
 
 
-def computePrefix(alphabet, keyword_list):	
+def computePrefix(alphabet, keyword_list, dbHost, dbUser, dbPassword):	
 	alpha_list = []
 	for tuple in keyword_list:
 		if tuple[1][0] == alphabet:
@@ -136,7 +139,7 @@ def computePrefix(alphabet, keyword_list):
 			data_tuple = (prefix, keyword_id_list[0], keyword_id_list[-1])
 			tuple_list.append(data_tuple)
 
-	connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
+	connection=mysql.connect (host=dbHost, user=dbUser, password=dbPassword, database="paperdb")
 	cursor=connection.cursor()
 	query = """	INSERT INTO paperdb.PrefixTable (Prefix, LowerKID, UpperKID) values (%s, %s, %s) """
 	cursor.executemany(query, tuple_list)
@@ -146,15 +149,14 @@ def computePrefix(alphabet, keyword_list):
 
 
 # Create Ngrams
-def createNgrams():
-	connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
+def createNgrams(dbHost, dbUser, dbPassword):
+	connection=mysql.connect (host=dbHost, user=dbUser, password=dbPassword, database="paperdb")
 	cursor=connection.cursor()
 	cursor.execute("SELECT Prefix from paperdb.PrefixTable")
 	prefix_list = cursor.fetchall()
 	# N is the number grams allowed for search, limiting it to 2 or 3 (fix this comment)
 	N = 3
 	
-	# print("Ngrams Table")
 	for record in prefix_list:
 		prefix = record[0]
 		NgramList = []
@@ -172,21 +174,43 @@ def createNgrams():
 		cursor.executemany(query, NgramTupleList)
 		cursor.execute("COMMIT")
 
-	cursor.execute("Select * from paperdb.NgramsTable")
-	prefix_list = cursor.fetchall()
-
 	cursor.close()
-	
 
-def TruncateTables():
-	connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
+
+def populateDBLP(dbHost, dbUser, dbPassword):
+	cwd = os.getcwd()
+	filename = os.path.join(cwd, "DBLP2.csv")
+	print(filename)
+	with open(filename, 'r', newline='', encoding = "ISO-8859-1") as file:
+		reader = csv.DictReader(file)
+		tuple_list = []
+		index = 1
+		for row in reader:
+			data_tuple = tuple((row['title'], row['authors'], row['venue'], row['year']))
+			tuple_list.append(data_tuple)
+
+		connection=mysql.connect (host=dbHost, user=dbUser, password=dbPassword, database="paperdb")
+		cursor=connection.cursor()	
+		query = """	INSERT INTO paperdb.dblp (Title, Authors, BookTitle, Year) values (%s, %s, %s, %s) """
+		cursor.executemany(query, tuple_list)
+		cursor.execute("COMMIT")
+		cursor.close()	
+
+
+def TruncateTables(dbHost, dbUser, dbPassword):
+	connection=mysql.connect (host=dbHost, user=dbUser, password=dbPassword, database="paperdb")
 	cursor=connection.cursor()
+	cursor.execute("TRUNCATE paperdb.dblp")
+	cursor.execute("TRUNCATE paperdb.keywordtable")
 	cursor.execute("TRUNCATE paperdb.invertedindextable")
 	cursor.execute("TRUNCATE paperdb.prefixtable")
 	cursor.execute("TRUNCATE paperdb.ngramstable")
 	cursor.close()
 
 
-TruncateTables()
-createAuxiliaryTables()
-createNgrams()
+
+def fuzzyTableFunctions(dbHost, dbUser, dbPassword):
+	TruncateTables(dbHost, dbUser, dbPassword)
+	populateDBLP(dbHost, dbUser, dbPassword)
+	createAuxiliaryTables(dbHost, dbUser, dbPassword)
+	createNgrams(dbHost, dbUser, dbPassword)

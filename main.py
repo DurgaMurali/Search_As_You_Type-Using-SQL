@@ -3,11 +3,27 @@ from tkinter import ttk
 import tkinter.messagebox as MessageBox
 import mysql.connector as mysql
 from search_functions import search_exact_index, search_fuzzy_gram, search_fuzzy_neighborhood
+import fuzzy_search
+import exact_search
+import sys
+import argparse
 
+parser = argparse.ArgumentParser()
+parser.add_argument("--populateTables", help="Populates the database tables",
+                    action="store_true")
+parser.add_argument("dbHost", help="The host IP of database connection")
+parser.add_argument("dbUser", help="The username of database connection")
+parser.add_argument("dbPassword", help="Password of database connection")
+args = parser.parse_args()
 
+if args.populateTables == True:
+	print("Populating Tables")
+	fuzzy_search.fuzzyTableFunctions(args.dbHost, args.dbUser, args.dbPassword)
+	exact_search.exactTableFunctions(args.dbHost, args.dbUser, args.dbPassword)
 
 root=Tk()
 root.geometry("940x600+20+20")
+root.configure(background='white')
 root.title("Search As You Type")
 
 
@@ -20,7 +36,7 @@ def insert_record():
 	if(title=="" or author=="" or booktitle=="" or year==""):
 		MessageBox.showinfo("Insert Status", "All Fields are required")
 	else:
-		connection=mysql.connect(host="localhost", user="root", password="Mydatabase", database="paperdb")
+		connection=mysql.connect(host=args.dbHost, user=args.dbUser, password=args.dbPassword, database="paperdb")
 		cursor=connection.cursor()
 		cursor.execute("INSERT INTO paperdb.dblp (Title, Authors, Booktitle, Year) VALUES('"+ title +"','"+ author +"','"+ booktitle +"','"+ year +"')")
 		cursor.execute("COMMIT")
@@ -38,7 +54,6 @@ def insert_record():
 #-------------------Check funtion for search bar------------------
 # Update entry box with listbox clicked
 def fillout(event):
-	# print("fillout called!")
 	# Delete whatever is in the entry box
 	search_bar.delete(0, END)
 
@@ -65,15 +80,15 @@ def check(e):
 
 		if clicked.get() == options[1]:
 			# print("options[1] selected")
-			search_exact_index(typed,dbpl_table,keyword_list)
+			search_exact_index(typed, dbpl_table,keyword_list, args.dbHost, args.dbUser, args.dbPassword)
 		
 		if clicked.get() == options[2]:
 			# print("options[2] selected")
-			search_fuzzy_gram(typed,dbpl_table,keyword_list)
+			search_fuzzy_gram(typed, dbpl_table,keyword_list, args.dbHost, args.dbUser, args.dbPassword)
 		
 		if clicked.get() == options[3]:
 			# print("options[3] selected")
-			search_fuzzy_neighborhood(typed,dbpl_table,keyword_list)	
+			search_fuzzy_neighborhood(typed, dbpl_table,keyword_list, args.dbHost, args.dbUser, args.dbPassword)	
 
 
 #--------------------------- Creating the Edit Table bar --------------------------------------------
@@ -144,17 +159,14 @@ table_frame.place(x=20,y=410,width=900,height=180)
 # Add a Treeview widget
 dbpl_table = ttk.Treeview(table_frame, column=("Title", "Author", "BookTitle", "Year"), show='headings', height=8)
 dbpl_table.column("# 1", anchor=CENTER)
-dbpl_table.heading("# 1", text="Author")
+dbpl_table.heading("# 1", text="Title")
 dbpl_table.column("# 2", anchor=CENTER)
-dbpl_table.heading("# 2", text="BookTitle")
+dbpl_table.heading("# 2", text="Author")
 dbpl_table.column("# 3", anchor=CENTER)
-dbpl_table.heading("# 3", text="Year")
+dbpl_table.heading("# 3", text="BookTitle")
 dbpl_table.column("# 4", anchor=CENTER)
-dbpl_table.heading("# 4", text="Title")
+dbpl_table.heading("# 4", text="Year")
 
 dbpl_table.pack()
-
-connection=mysql.connect (host="localhost", user="root", password="Mydatabase", database="paperdb")
-cursor=connection.cursor()
 root.mainloop()
 
