@@ -16,27 +16,34 @@ Our aim is to implement the prototype solution presented in the paper, which uti
 pip install tkinter
 pip install mysql-connector-python
 pip install python-Levenshtein
+pip install rake-nltk
 ```
 
 ### Executing program
 1. Run all the queries from *db_scripts.sql* file to create schemas in MySQL Workbench. You can use the Edit table section of UI to populate original *DBPL prototype table*.
-2. Run the exact_search.py and fuzzy_search.py to populate the schemas created in step 1.
+2. To get information about command-line parameters please use *--help* option as shown below.
 ```
-python exact_search.py
-python fuzzy_search.py
+python main.py --help
 ```
-3. Update 'host', 'user', 'password' with your credentials in all the statements that connect to mysql in *main.py* file - 
+3. In order to populate tables from the *DBLP2.csv* file and also execute the search functionality, 4 command-line parameters are to be passed as shown below.
 ```
-mysql.connect(host="---", user="---", password="---", database="paperdb")
+python main.py --populateTables hostIP username password
 ```
-4. Run the main.py file to test the search features in the UI. 
+--populateTables - Populates the database tables
+hostIP           - The host IP of database connection
+username         - The username of database connection
+password         - Password of database connection
+For example, python main.py --populateTables localhost root Mydata@123
+4. In order to only execute the search functionality without populating database tables, 3 command-line parameters are to be passed as shown below. 
 ```
-python main.py
+python main.py hostIP username password
 ```
-5. If a set of new records are inserted using UI, then step 2. need to be excuted again as well to populate the information of new record in auxiliary tables. 
+5. If a set of new records are inserted using UI, then step 3 needs to be excuted again as well to populate the information of new record in auxiliary tables.
 ## Authors
 
-Charul Rathore and Durga Muralidharan 
+1. Charul Rathore [45% code, 45% report and presentation]  
+2. Durga Muralidharan [45% code, 45% report and presentation]
+3. Swati SVM [10% code, 10% report and presentation]
 
 
 ## Acknowledgments
