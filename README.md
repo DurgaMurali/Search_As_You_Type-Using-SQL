@@ -29,11 +29,13 @@ python main.py --help
 ```
 python main.py --populateTables hostIP username password
 ```
+```
 --populateTables - Populates the database tables
 hostIP           - The host IP of database connection
 username         - The username of database connection
 password         - Password of database connection
 For example, python main.py --populateTables localhost root Mydata@123
+```
 4. In order to only execute the search functionality without populating database tables, 3 command-line parameters are to be passed as shown below. 
 ```
 python main.py hostIP username password
